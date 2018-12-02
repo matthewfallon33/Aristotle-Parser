@@ -48,17 +48,29 @@ public class LexAnalyser {
 
 		else if (Character.isUpperCase(peek)) {
 			if (peek == 'T') {
+				if(newId != null) {
 				newId.setValue(true);
+//				if I enter T as the first character in the program ill get a nullpointer
+//				this is because newId hasn't acctually been initialized
 				System.out.println(newId.getIdName() + " = " + newId.getValue());
 				addIdentifier(newId);
 				token = new Token(TokenType.TRUE);				
 				System.out.println(token.returnType());
 				peek = (char) System.in.read();
+				}	else {
+					System.out.println("You need to assign a boolean to an identifier!");
+				}
 			} else if (peek == 'F') {
+				if(newId != null) {
 				newId.setValue(false);
+				addIdentifier(newId);
 				token = new Token(TokenType.FALSE);
 				System.out.println(token.returnType());
-				peek = (char) System.in.read();
+				peek = (char) System.in.read();}
+				else {
+					System.out.println("You need to assign a boolean to an identifier!");
+				}
+				
 			} else {
 				token = new Token(TokenType.NULL_TOKEN);
 				System.out.println(token.returnType());

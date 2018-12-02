@@ -29,7 +29,7 @@ public class Aristotle {
 		LexAnalyser lex = new LexAnalyser();
 		Token nextToken = new Token(TokenType.END_OF_EXPR);
 		
-//		boolean values aren't getting added to the token array
+
 
 		System.out.println("--- Beginning Lexical Analysis ---");
 
@@ -53,6 +53,7 @@ public class Aristotle {
 				}
 				if (nextToken.returnType() == TokenType.NULL_TOKEN) { // NULL TOKEN means syntax error
 					lexAnalysisSuccessful = false;
+					System.out.println("Lexical Analysis Unsuccessful NULL_TOKEN at token " + currentToken);
 				}
 					currentToken++;
 			} catch (IOException ex) {
