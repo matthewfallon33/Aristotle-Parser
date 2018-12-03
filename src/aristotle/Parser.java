@@ -157,36 +157,42 @@ public class Parser {
 			// do you need outerval?
 			if (((OperatorToken) tokens[position]).getType() == (OperatorType.AND)) {
 				if (innerTempVal) {
+					System.out.println("inner temp val true");
 					match(TokenType.OPERATOR);
 					expression();
 				}
 			} else {
+				System.out.println("inner temp val not true " +  innerTempVal);
 				if (check(TokenType.END_OF_EXPR)) {
 					match(TokenType.END_OF_EXPR);
 				} else {
-					System.out.println("I dunno what's happening");
+					System.out.println("I dunno what's happening + " + ((OperatorToken) tokens[position]).getType());
 					return;
 				}
 			}
 		}
-	}
+	} 
 
 	private void innerExpr() throws SyntaxException {
 		System.out.println("innerExpr");
-
+		// x:T;a:T;-(a) ^ (!x)$ this one not evaluating properly need to set
+		// outerTempVal properly
 		// so it's gonna keep matching in here until it finds a right bracket )
 		// NOT
 		if (check(TokenType.ID)) {
+			System.out.println(((IdentToken) tokens[position]).identifierName + " is an ID");
 			if (innerTempVal == null) {
 				innerTempVal = vars.get(((IdentToken) tokens[position]).getIdName()).getValue();
 				System.out.println("InnerT " + innerTempVal);
 				match(TokenType.ID);
 				innerExpr();
 				// should we recurse here to go to OR?
-			}
-
+			}}
+			// try this without check use isOp it looks silly using both
 			if (check(TokenType.OPERATOR)) {
 				if (isOp(tokens[position])) {
+					System.out.println("this is where it's coming through keeee");
+					System.out.println(((OperatorToken) tokens[position]).getType() + " is an OPERATOR");
 					System.out.println("After coming through isOp " + ((OperatorToken) tokens[position]).getType());
 
 					if (((OperatorToken) tokens[position]).getType() == (OperatorType.NOT)) {
@@ -197,43 +203,65 @@ public class Parser {
 						String idName = ((IdentToken) tokens[position]).getIdName();
 						IdentToken newToken = vars.get(idName);
 						newToken.setValue(!vars.get(idName).value);
+						newToken.setNegated(true);
+//						to say that the tokens value is the opposite of it's initial value
 						if (innerTempVal == null) {
+							System.out.println("innerTempVal was null but now its the value of " + newToken.getIdName()
+									+ " " + newToken.getValue());
 							innerTempVal = newToken.getValue();
-						} 
-						else {
+						} else {
+							System.out.println("else " + newToken.getIdName() + " is " + newToken.getValue());
 							innerTempVal = newToken.getValue();
 						}
-//						if (innerTempVal) {
-//							// innerTempVal = ;
-//							// is this an inner problem or an outer?
-//						}
-//						LOOK AT THIS AGAIN
-						
-
+						// if (innerTempVal) {
+						// // innerTempVal = ;
+						// // is this an inner problem or an outer?
+						// }
+						// LOOK AT THIS AGAIN
 						// something needs to happen here
 						match(TokenType.ID);
 						innerExpr();
 					}
 				}
 			}
+			// maybe add a check here?
+			if (check(TokenType.OPERATOR)) {
+				if (isOp(tokens[position])) {
+					System.out.println("THE ISOP I WANT IT TO COME THROUGH");
+					if (((OperatorToken) tokens[position]).getType() == (OperatorType.OR)) {
 
-			if (isOp(tokens[position])) {
-				if (((OperatorToken) tokens[position]).getType() == (OperatorType.OR)) {
-					System.out.println("come through or");
-					match(TokenType.OPERATOR);
-					// at this point we've matched the or
-					// but the next token can either be an ID or a NOT so we can
-					// handle it with two ifs instead of if else: dont ask me
-					// why
-					if (isOp(tokens[position])) {
-						if (((OperatorToken) tokens[position]).getType() == (OperatorType.NOT)) {
-							// increment the position to next token
-							match(TokenType.OPERATOR);
+						System.out.println("come through or");
+						match(TokenType.OPERATOR);
+						// at this point we've matched the or
+						// but the next token can either be an ID or a NOT so we can
+						// handle it with two ifs instead of if else: dont ask me
+//						x:T;a:T;-(a) ^ (x)$
+
+
+						if (isOp(tokens[position])) {
+							if (((OperatorToken) tokens[position]).getType() == (OperatorType.NOT)) {
+								System.out.println(
+										((OperatorToken) tokens[position]).getType() + " coming through not routeeeee");
+								// increment the position to next token
+								match(TokenType.OPERATOR);
+								// so here it should match the not but it doesn't ????
+								String idName = ((IdentToken) tokens[position]).getIdName();
+								IdentToken newToken = vars.get(idName);
+								newToken.setValue(!vars.get(idName).value);
+								newToken.setNegated(true);
+								System.out.println(innerTempVal + " || " + newToken.getValue());
+								if (innerTempVal || newToken.getValue()) {
+									innerTempVal = true;
+								} else {
+									innerTempVal = false;
+								}
+								match(TokenType.ID);
+							}
+						}
+						if (check(TokenType.ID)) {
+							System.out.println("checked a non negated id after the or" + tokens[position].returnType());
 							String idName = ((IdentToken) tokens[position]).getIdName();
-							IdentToken newToken = vars.get(idName);
-							newToken.setValue(!vars.get(idName).value);
-							System.out.println(innerTempVal + " || " + newToken.getValue());
-							if (innerTempVal || newToken.getValue()) {
+							if (innerTempVal || vars.get(idName).getValue()) {
 								innerTempVal = true;
 							} else {
 								innerTempVal = false;
@@ -241,24 +269,15 @@ public class Parser {
 							match(TokenType.ID);
 						}
 					}
-					if (check(TokenType.ID)) {
-						System.out.println("checked a non negated id after the or" + tokens[position].returnType());
-						String idName = ((IdentToken) tokens[position]).getIdName();
-						if (innerTempVal || vars.get(idName).getValue()) {
-							innerTempVal = true;
-						} else {
-							innerTempVal = false;
-						}
-						match(TokenType.ID);
-					}
 				}
 			}
 		}
 		// ID for non not values
 
-		//// a:T;x:F;-(!a|!x)$ is crashing the left side of if check crashes
-
-	}
+//it all works just need to start working with the negations (!a | !t) ^ (a) = false because a has been negated
+//	although the program shouldn't work like this it should result to true
+//	so we should find a way of ensuring we are checking the initial values rather than the ones the tokens are being set too
+//	i have made a negated boolean so start working on that
 
 	private void lbracket() throws SyntaxException {
 		System.out.println("LBRACKET");
@@ -278,7 +297,8 @@ public class Parser {
 		if (check(TokenType.RBRACKET)) {
 			match(TokenType.RBRACKET);
 		} else {
-			System.out.println("RBRACKET: Expecting RBRACKET");
+			System.out
+					.println("RBRACKET: Expecting RBRACKET instead of" + tokens[position].returnType());
 		}
 	}
 
