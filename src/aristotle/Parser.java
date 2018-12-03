@@ -246,8 +246,12 @@ public class Parser {
 								match(TokenType.OPERATOR);
 								// so here it should match the not but it doesn't ????
 								String idName = ((IdentToken) tokens[position]).getIdName();
+								System.out.println("idName " + idName);
 								IdentToken newToken = vars.get(idName);
+								System.out.println("newToken " + newToken);
+								System.out.println(vars);
 								newToken.setValue(!vars.get(idName).value);
+//								x:T;a:T;-(!a | !t) ^ (a)$ giving error on setValue
 								newToken.setNegated(true);
 								System.out.println(innerTempVal + " || " + newToken.getValue());
 								if (innerTempVal || newToken.getValue()) {
@@ -273,11 +277,16 @@ public class Parser {
 			}
 		}
 		// ID for non not values
+	
+	
+//	
+	
+
 
 //it all works just need to start working with the negations (!a | !t) ^ (a) = false because a has been negated
 //	although the program shouldn't work like this it should result to true
 //	so we should find a way of ensuring we are checking the initial values rather than the ones the tokens are being set too
-//	i have made a negated boolean so start working on that
+//	i have made a negated boolean so start working on thatit
 
 	private void lbracket() throws SyntaxException {
 		System.out.println("LBRACKET");
@@ -351,7 +360,11 @@ public class Parser {
 			match(TokenType.TRUE);
 		} else if (check(TokenType.FALSE)) {
 			match(TokenType.FALSE);
-		} else {
+		} else if(check(TokenType.QMARK)) {
+			match(TokenType.QMARK);
+//			tokens[position] = TokenType.FALSE;
+		}
+		else {
 			parseError = true;
 			System.out.println("Bool: Expected Boolean Value(T|F) instead of " + tokens[position].returnType()
 					+ " at token " + (position + 1));
