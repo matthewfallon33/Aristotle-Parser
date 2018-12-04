@@ -7,6 +7,7 @@
 package aristotle;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 //Lexer/Parse error xxx:T; doesn't throw an error
@@ -19,17 +20,15 @@ public class Aristotle {
 	public static int currentToken = 0;
 	public static Hashtable<String, IdentToken> idents; // All identifiers of the program, indexed by name
 	public static boolean lexAnalysisSuccessful = true;
+	public static boolean QMark = false;
 
 	/*
-	 * need to assign values to variables
-	 * need to make expr methods
-	*/
-	
+	 * need to assign values to variables need to make expr methods
+	 */
+
 	public static void main(String[] args) throws SyntaxException {
 		LexAnalyser lex = new LexAnalyser();
 		Token nextToken = new Token(TokenType.END_OF_EXPR);
-		
-
 
 		System.out.println("--- Beginning Lexical Analysis ---");
 
@@ -37,25 +36,29 @@ public class Aristotle {
 			try {
 				nextToken = lex.scan();
 				tokenSequence[currentToken] = nextToken;
-										
-				if(nextToken.returnType() == TokenType.END_OF_EXPR) {
-					if(lexAnalysisSuccessful) {
-						System.out.println("Lexical Analysis Successful! with "+ currentToken  +" Tokens\n");
-//						System.out.println(idents.size() + " Idents created");
-						
-						for(int i = 0; i < tokenSequence.length; i++) {
-							if(tokenSequence[i] == null) {
+
+				if (nextToken.returnType() == TokenType.END_OF_EXPR) {
+					if (lexAnalysisSuccessful) {
+						System.out.println("Lexical Analysis Successful! with " + currentToken + " Tokens\n");
+						// System.out.println(idents.size() + " Idents created");
+
+						for (int i = 0; i < tokenSequence.length; i++) {
+							if (tokenSequence[i] == null) {
 								break;
 							}
 							System.out.print(tokenSequence[i].returnType() + "\t");
 						}
 					}
 				}
+				if (nextToken.returnType() == TokenType.QMARK) {
+					QMark = true;
+				}
 				if (nextToken.returnType() == TokenType.NULL_TOKEN) { // NULL TOKEN means syntax error
 					lexAnalysisSuccessful = false;
 					System.out.println("Lexical Analysis Unsuccessful NULL_TOKEN at token " + currentToken);
 				}
-					currentToken++;
+
+				currentToken++;
 			} catch (IOException ex) {
 				// maybe read about IOException
 				System.out.println("Syntax Error");
@@ -68,9 +71,37 @@ public class Aristotle {
 		// This next declaration passes the sequence of tokens and hashtable of
 		// identifiers to the parser
 		Parser pars = new Parser(tokenSequence, idents);
-//		pars.printVars();
-		pars.prog();
-		
+		// pars.printVars();
+		// if(there is "?")
+
+		if (QMark) {
+			// this one breaks it x:?;-(x);
+			// we need to actually set the values of the identTokens
+			// so if x:?; set x to false once then next set it to true call prog twice and
+			// see the different results
+			System.out.println("There is a ?");
+			while (pars.QCount < pars.QMax) {
+				System.out.println("QCount: " + pars.QCount);
+
+//				if we get a successful case for the '?' 
+				
+				pars.position = 0;
+				// if( pars.innerTempVal != null || !pars.innerTempVal) {
+				pars.innerTempVal = null;
+//				a:?;b:T;- (a|b) ^ (!b)$ 
+//				a:F;b:T;- (a|b) ^ (!b)$ 
+//
+				pars.prog();
+				pars.QCount++;
+			}
+			// }
+		} else {
+			System.out.println("No question mark");
+			pars.prog();
+		}
+
+		// pars.prog();
+
 		System.out.println("\n--- Ending Parsing ---");
 		System.out.println(idents.size());
 	}
