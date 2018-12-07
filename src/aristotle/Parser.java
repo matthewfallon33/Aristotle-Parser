@@ -28,10 +28,6 @@ public class Parser {
 		vars = variables;
 	}
 
-	// public void printVars() {
-	// System.out.println(vars.keySet().toString().split(",")[0]);
-	// }
-
 	private void parseError() throws SyntaxException {
 		System.out.println("Parse Error: on token: " + (position + 1));
 		tokens[position].print();
@@ -55,7 +51,7 @@ public class Parser {
 			// System.out.println(tokens[position].returnType() + " Matches " +
 			// tokType);
 			if (isIdent(tokens[position])) {
-				System.out.println(tokens[position].returnType() + " is an ident");
+				// System.out.println(tokens[position].returnType() + " is an ident");
 				// curId = (IdentToken) tokens[position];
 				// vars.put(curId.getIdName(), curId);
 				// System.out.println(vars.get(curId.getIdName()).getIdName());
@@ -80,8 +76,9 @@ public class Parser {
 
 	// Start to parse the program (you will need to write this method)
 	public void prog() throws SyntaxException {
-		System.out.println("PROGGGGGGGGGGGGGGGGGGGGGGG");
-		System.out.println("isop " + tokens[position].returnType() + isOp(new OperatorToken(OperatorType.AND)));
+		// System.out.println("PROGGGGGGGGGGGGGGGGGGGGGGG");
+		// System.out.println("isop " + tokens[position].returnType() + isOp(new
+		// OperatorToken(OperatorType.AND)));
 		// First parse declarations
 		decls2();
 		hyphen();
@@ -103,7 +100,7 @@ public class Parser {
 	private void hyphen() throws SyntaxException {
 		// lookahead = '-'
 		if (check(TokenType.HYPHEN)) {
-			System.out.println("HYPHEN!");
+			// System.out.println("HYPHEN!");
 			match(TokenType.HYPHEN);
 		} else {
 			if (!parseError)
@@ -129,17 +126,6 @@ public class Parser {
 
 	// trying to write comparison methods
 
-	private boolean convertToBool(TokenType bool) {
-		Boolean val = null;
-		if (bool == TokenType.FALSE) {
-			val = false;
-		}
-		if (bool == TokenType.TRUE) {
-			val = true;
-		}
-		return val;
-	}
-
 	private void end_of_file() throws SyntaxException {
 		if (tokens[position].returnType() == TokenType.END_OF_EXPR && !parseError) {
 			match(tokens[position].thisToken);
@@ -155,17 +141,16 @@ public class Parser {
 		rbracket();
 		System.out.println(vars);
 
-		System.out.println("FINAL: " + QCount + " " + innerTempVal);
+		System.out.println("Expression evaluates to: " + innerTempVal);
 		if (check(TokenType.OPERATOR)) {
-			// do you need outerval?
 			if (((OperatorToken) tokens[position]).getType() == (OperatorType.AND)) {
 				if (innerTempVal) {
-					System.out.println("inner temp val true");
+					// System.out.println("inner temp val true");
 					match(TokenType.OPERATOR);
 					expression();
 				}
 			} else {
-				System.out.println("inner temp val not true " + innerTempVal);
+				// System.out.println("inner temp val not true " + innerTempVal);
 				if (check(TokenType.END_OF_EXPR)) {
 					match(TokenType.END_OF_EXPR);
 				} else {
@@ -177,47 +162,61 @@ public class Parser {
 	}
 
 	private void innerExpr() throws SyntaxException {
-		System.out.println("innerExpr");
+		// System.out.println("innerExpr");
 		// x:T;a:T;-(a) ^ (!x)$ this one not evaluating properly need to set
 		// outerTempVal properly
 		// so it's gonna keep matching in here until it finds a right bracket )
 		// NOT
 		if (check(TokenType.ID)) {
-			System.out.println(((IdentToken) tokens[position]).identifierName + " is an ID");
 			if (innerTempVal == null) {
-				innerTempVal = vars.get(((IdentToken) tokens[position]).getIdName()).getValue();
-				// a:T;b:T;-(c)$
-				System.out.println("InnerT " + innerTempVal);
-				match(TokenType.ID);
-				innerExpr();
-				// should we recurse here to go to OR?
+				if (isIdent(tokens[position])) {
+					IdentToken idToken = ((IdentToken) tokens[position]);
+					String idName = idToken.getIdName();
+					System.out.println("" + vars.get(idName));
+					System.out.println(tokens[position].returnType());
+					if (vars.get(idName) != null) {
+						System.out.println("Duplicate Variable Detected");
+					} else {
+						innerTempVal = vars.get(((IdentToken) tokens[position]).getIdName()).getValue();
+					}
+					// a:T;b:T;-(c)$
+					// System.out.println("InnerT " + innerTempVal);
+					match(TokenType.ID);
+					innerExpr();
+					// should we recurse here to go to OR?
+				}
 			}
 		}
 		// try this without check use isOp it looks silly using both
 		if (check(TokenType.OPERATOR)) {
 			if (isOp(tokens[position])) {
-				System.out.println("this is where it's coming through keeee");
-				System.out.println(((OperatorToken) tokens[position]).getType() + " is an OPERATOR");
-				System.out.println("After coming through isOp " + ((OperatorToken) tokens[position]).getType());
+				// System.out.println("this is where it's coming through keeee");
+				// System.out.println(((OperatorToken) tokens[position]).getType() + " is an
+				// OPERATOR");
+				// System.out.println("After coming through isOp " + ((OperatorToken)
+				// tokens[position]).getType());
 
 				if (((OperatorToken) tokens[position]).getType() == (OperatorType.NOT)) {
-					System.out.println("come through not route");
+					// System.out.println("come through not route");
 					match(TokenType.OPERATOR);
-					System.out.println();
+					// System.out.println();
 					// so it'll go to next id
 					String idName = ((IdentToken) tokens[position]).getIdName();
 					IdentToken newToken = vars.get(idName);
-					System.out.println(vars.get(idName).value
-							+ "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+					// System.out.println(vars.get(idName).value
+					// +
+					// "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
 					newToken.setValue(!vars.get(idName).value);
 					newToken.setNegated(true);
 					// to say that the tokens value is the opposite of it's initial value
 					if (innerTempVal == null) {
-						System.out.println("innerTempVal was null but now its the value of " + newToken.getIdName()
-								+ " " + newToken.getValue());
+						// System.out.println("innerTempVal was null but now its the value of " +
+						// newToken.getIdName()
+						// + " " + newToken.getValue());
 						innerTempVal = newToken.getValue();
 					} else {
-						System.out.println("else " + newToken.getIdName() + " is " + newToken.getValue());
+						// System.out.println("else " + newToken.getIdName() + " is " +
+						// newToken.getValue());
 						innerTempVal = newToken.getValue();
 					}
 					// if (innerTempVal) {
@@ -234,10 +233,10 @@ public class Parser {
 		// maybe add a check here?
 		if (check(TokenType.OPERATOR)) {
 			if (isOp(tokens[position])) {
-				System.out.println("THE ISOP I WANT IT TO COME THROUGH");
+				// System.out.println("THE ISOP I WANT IT TO COME THROUGH");
 				if (((OperatorToken) tokens[position]).getType() == (OperatorType.OR)) {
 
-					System.out.println("come through or");
+					// System.out.println("come through or");
 					match(TokenType.OPERATOR);
 					// at this point we've matched the or
 					// but the next token can either be an ID or a NOT so we can
@@ -246,8 +245,9 @@ public class Parser {
 
 					if (isOp(tokens[position])) {
 						if (((OperatorToken) tokens[position]).getType() == (OperatorType.NOT)) {
-							System.out.println(
-									((OperatorToken) tokens[position]).getType() + " coming through not routeeeee");
+							// System.out.println(
+							// ((OperatorToken) tokens[position]).getType() + " coming through not
+							// routeeeee");
 							// increment the position to next token
 							match(TokenType.OPERATOR);
 							// so here it should match the not but it doesn't ????
@@ -271,12 +271,15 @@ public class Parser {
 					// x:?-(x)$
 
 					if (check(TokenType.ID)) {
-						System.out.println("checked a non negated id after the or" + tokens[position].returnType());
+						// System.out.println("checked a non negated id after the or" +
+						// tokens[position].returnType());
 						String idName = ((IdentToken) tokens[position]).getIdName();
 						if (innerTempVal || vars.get(idName).getValue()) {
 							innerTempVal = true;
 						} else {
 							innerTempVal = false;
+							// x:T;d:F;-(!d) ^ (x)$
+
 						}
 						match(TokenType.ID);
 					}
@@ -296,7 +299,7 @@ public class Parser {
 	// i have made a negated boolean so start working on thatit
 
 	private void lbracket() throws SyntaxException {
-		System.out.println("LBRACKET");
+		// System.out.println("LBRACKET");
 		if (parseError)
 			return;
 		if (check(TokenType.LBRACKET)) {
@@ -307,7 +310,7 @@ public class Parser {
 	};
 
 	private void rbracket() throws SyntaxException {
-		System.out.println("RBRACKET");
+		// System.out.println("RBRACKET");
 		if (parseError)
 			return;
 		if (check(TokenType.RBRACKET)) {
@@ -315,13 +318,6 @@ public class Parser {
 		} else {
 			System.out.println("RBRACKET: Expecting RBRACKET instead of" + tokens[position].returnType());
 		}
-	}
-
-	private void operator() throws SyntaxException {
-		System.out.println("operator check");
-		// this is where fancy stuff should happen
-		// we should use is inner op to compare to values OR two expressions
-
 	}
 
 	boolean isOuterOp(Token t) {
@@ -333,11 +329,14 @@ public class Parser {
 	}
 
 	private void id() throws SyntaxException {
-		System.out.println("id");
+		// System.out.println("id");
 		if (parseError)
 			return;
 		if (check(TokenType.ID)) {
 			match(TokenType.ID);
+			if (check(TokenType.ID)) {
+				id();
+			}
 		} else {
 			parseError = true;
 			System.out.println(
@@ -346,7 +345,7 @@ public class Parser {
 	};
 
 	private void colon() throws SyntaxException {
-		System.out.println("colon");
+		// System.out.println("colon");
 		if (parseError)
 			return;
 		if (check(TokenType.COLON)) {
@@ -359,7 +358,7 @@ public class Parser {
 	};
 
 	private void bool() throws SyntaxException {
-		System.out.println("bool");
+		// System.out.println("bool");
 		if (parseError)
 			return;
 		if (check(TokenType.TRUE)) {
@@ -378,9 +377,6 @@ public class Parser {
 				// x:?;-(x)$
 			}
 			if (QCount == 1) {
-				// only gonna come in here when we start actually looping
-				// tokens[position] = new Token(TokenType.TRUE);
-				// position++;
 
 				String id = ((IdentToken) tokens[position - 2]).getIdName();
 
@@ -402,7 +398,7 @@ public class Parser {
 	};
 
 	private void semicolon() throws SyntaxException {
-		System.out.println("semi colon");
+		// System.out.println("semi colon");
 		if (parseError)
 			return;
 		if (check(TokenType.SEMICOLON)) {

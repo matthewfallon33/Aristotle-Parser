@@ -56,6 +56,7 @@ public class Aristotle {
 				if (nextToken.returnType() == TokenType.NULL_TOKEN) { // NULL TOKEN means syntax error
 					lexAnalysisSuccessful = false;
 					System.out.println("Lexical Analysis Unsuccessful NULL_TOKEN at token " + currentToken);
+					return;
 				}
 
 				currentToken++;
@@ -86,6 +87,7 @@ public class Aristotle {
 //				if we get a successful case for the '?' 
 				
 				pars.position = 0;
+//				pars.vars = 
 				// if( pars.innerTempVal != null || !pars.innerTempVal) {
 				pars.innerTempVal = null;
 //				a:?;b:T;- (a|b) ^ (!b)$ 

@@ -38,6 +38,9 @@ public class LexAnalyser {
 
 		if (Character.isLowerCase(peek)) {
 			// checking for an identifier
+
+//			System.out.println(identifiers.get(Character.toString(peek)));
+
 			newId = new IdentToken(Character.toString(peek));
 			token = newId;
 			// addIdentifier(newId);
@@ -50,27 +53,36 @@ public class LexAnalyser {
 			if (peek == 'T') {
 				if (newId != null) {
 					newId.setValue(true);
-					// if I enter T as the first character in the program ill get a nullpointer
-					// this is because newId hasn't acctually been initialized
-					System.out.println(newId.getIdName() + " = " + newId.getValue());
-					addIdentifier(newId);
-					token = new Token(TokenType.TRUE);
-					System.out.println(token.returnType());
-					peek = (char) System.in.read();
+					if (identifiers.get(newId.getIdName()) != null) {
+//						System.out.println("already an identifier with this name " + newId.getIdName());
+						return token = new Token(TokenType.NULL_TOKEN);
+					} else {
+//						System.out.println("Not a duplicate");
+						addIdentifier(newId);
+						token = new Token(TokenType.TRUE);
+						System.out.println(token.returnType());
+						peek = (char) System.in.read();
+					}
+
 				} else {
 					System.out.println("You need to assign a boolean to an identifier!");
 				}
 			} else if (peek == 'F') {
 				if (newId != null) {
 					newId.setValue(false);
-					addIdentifier(newId);
-					token = new Token(TokenType.FALSE);
-					System.out.println(token.returnType());
-					peek = (char) System.in.read();
+					if (identifiers.get(newId.getIdName()) != null) {
+						System.out.println("already an identifier with this name " + newId.getIdName());
+						return token = new Token(TokenType.NULL_TOKEN);
+					} else {
+						addIdentifier(newId);
+						token = new Token(TokenType.FALSE);
+						System.out.println(token.returnType());
+						
+						peek = (char) System.in.read();
+					}
 				} else {
 					System.out.println("You need to assign a boolean to an identifier!");
 				}
-				
 
 			} else {
 				token = new Token(TokenType.NULL_TOKEN);
@@ -136,13 +148,13 @@ public class LexAnalyser {
 					System.out.println(newId.getIdName() + " initialized to " + newId.getValue());
 					addIdentifier(newId);
 					token = new Token(TokenType.QMARK);
-//					DO WE ACC NEED A QMARK TOKEN?
+					// DO WE ACC NEED A QMARK TOKEN?
 					System.out.println(token.returnType());
 					peek = (char) System.in.read();
 				} else {
 					System.out.println("You need to assign a boolean (T | F | ?) to an identifier!");
 				}
-//				peek = (char) System.in.read();
+				// peek = (char) System.in.read();
 				break;
 			default:
 				System.out.println("Unknown: " + peek);
