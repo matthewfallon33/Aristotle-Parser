@@ -7,11 +7,7 @@
 package aristotle;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Hashtable;
-
-//Lexer/Parse error xxx:T; doesn't throw an error
-//make sure that the program only accepts single letter identifiers
 
 public class Aristotle {
 	public static final int MAX_NUM_TOKENS = 3000; // You may assume there will be no more than 3000 tokens
@@ -22,11 +18,8 @@ public class Aristotle {
 	public static boolean lexAnalysisSuccessful = true;
 	public static boolean QMark = false;
 
-	/*
-	 * need to assign values to variables need to make expr methods
-	 */
 
-	public static void main(String[] args) throws SyntaxException {
+	public static void main(String[] args) {
 		LexAnalyser lex = new LexAnalyser();
 		Token nextToken = new Token(TokenType.END_OF_EXPR);
 
@@ -39,7 +32,7 @@ public class Aristotle {
 
 				if (nextToken.returnType() == TokenType.END_OF_EXPR) {
 					if (lexAnalysisSuccessful) {
-						System.out.println("Lexical Analysis Successful! with " + currentToken + " Tokens\n");
+						System.out.println("Lexical Analysis Successful! with " + (currentToken + 1) + " Tokens\n");
 						// System.out.println(idents.size() + " Idents created");
 
 						for (int i = 0; i < tokenSequence.length; i++) {
@@ -50,6 +43,7 @@ public class Aristotle {
 						}
 					}
 				}
+
 				if (nextToken.returnType() == TokenType.QMARK) {
 					QMark = true;
 				}
@@ -69,42 +63,26 @@ public class Aristotle {
 		// Lexical analysis complete, now on to parsing..
 		System.out.println("\n--- Beginning Parsing ---\n");
 		idents = lex.getIdentifiers();
-		// This next declaration passes the sequence of tokens and hashtable of
-		// identifiers to the parser
 		Parser pars = new Parser(tokenSequence, idents);
-		// pars.printVars();
-		// if(there is "?")
+
 
 		if (QMark) {
-			// this one breaks it x:?;-(x);
-			// we need to actually set the values of the identTokens
-			// so if x:?; set x to false once then next set it to true call prog twice and
-			// see the different results
-			System.out.println("There is a ?");
+			
 			while (pars.QCount < pars.QMax) {
 				System.out.println("QCount: " + pars.QCount);
-
-//				if we get a successful case for the '?' 
-				
+//				re-initializing variables, dunno if I should re-init vars??
 				pars.position = 0;
-//				pars.vars = 
-				// if( pars.innerTempVal != null || !pars.innerTempVal) {
 				pars.innerTempVal = null;
-//				a:?;b:T;- (a|b) ^ (!b)$ 
-//				a:F;b:T;- (a|b) ^ (!b)$ 
-//
 				pars.prog();
 				pars.QCount++;
 			}
-			// }
 		} else {
-			System.out.println("No question mark");
+//	no question marks
 			pars.prog();
 		}
 
-		// pars.prog();
-
 		System.out.println("\n--- Ending Parsing ---");
-		System.out.println(idents.size());
+		if(!QMark)		
+		System.out.println("Expression evaluates to: " + pars.innerTempVal);
 	}
 }

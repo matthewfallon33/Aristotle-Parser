@@ -18,46 +18,39 @@ public class LexAnalyser {
 	}
 
 	public LexAnalyser() {
-		// we should make something in here
+
 	}
 
-	// This next method is for you to write, to scan the input and return the
-	// correct Token for the next lexeme
-	// The comments inside the scan() method may help you to structure your code
 	public Token scan() throws IOException {
 		// newId = null;.
 		Token token = null;
 		for (;; peek = (char) System.in.read()) {
+//			ignoring whitespace characters and line breaks etc
 			if (peek == ' ' || peek == '\t' || peek == '\n' || peek == '\r')
 				continue;
 			else
 				break;
 		}
 
-		// I think this logic is steady enough now keep everything else if
-
 		if (Character.isLowerCase(peek)) {
 			// checking for an identifier
-
-//			System.out.println(identifiers.get(Character.toString(peek)));
-
 			newId = new IdentToken(Character.toString(peek));
 			token = newId;
-			// addIdentifier(newId);
 			System.out.println(token.returnType());
 			peek = (char) System.in.read();
-			// return new Token(TokenType.ID);
+
 		}
 
 		else if (Character.isUpperCase(peek)) {
+//			checks boolean value then applys the boolean value to the identToken
 			if (peek == 'T') {
 				if (newId != null) {
 					newId.setValue(true);
 					if (identifiers.get(newId.getIdName()) != null) {
-//						System.out.println("already an identifier with this name " + newId.getIdName());
+						System.out.println("Duplicate Variable: Already an identifier with this name " + newId.getIdName());
 						return token = new Token(TokenType.NULL_TOKEN);
 					} else {
-//						System.out.println("Not a duplicate");
+						// System.out.println("Not a duplicate");
 						addIdentifier(newId);
 						token = new Token(TokenType.TRUE);
 						System.out.println(token.returnType());
@@ -65,6 +58,7 @@ public class LexAnalyser {
 					}
 
 				} else {
+//					if no identifier set for a boolean value
 					System.out.println("You need to assign a boolean to an identifier!");
 				}
 			} else if (peek == 'F') {
@@ -77,7 +71,7 @@ public class LexAnalyser {
 						addIdentifier(newId);
 						token = new Token(TokenType.FALSE);
 						System.out.println(token.returnType());
-						
+
 						peek = (char) System.in.read();
 					}
 				} else {
@@ -93,7 +87,7 @@ public class LexAnalyser {
 		}
 
 		else if (!Character.isAlphabetic(peek)) {
-			// just needa add bracket support below
+//			checking for non alphabetic characters
 			switch (peek) {
 			case '$':
 				token = new Token(TokenType.END_OF_EXPR);
@@ -143,30 +137,25 @@ public class LexAnalyser {
 			case '?':
 				if (newId != null) {
 					newId.setValue(false);
-					// if I enter T as the first character in the program ill get a nullpointer
-					// this is because newId hasn't acctually been initialized
-					System.out.println(newId.getIdName() + " initialized to " + newId.getValue());
+//					init the '?' var to false
 					addIdentifier(newId);
 					token = new Token(TokenType.QMARK);
-					// DO WE ACC NEED A QMARK TOKEN?
 					System.out.println(token.returnType());
 					peek = (char) System.in.read();
 				} else {
 					System.out.println("You need to assign a boolean (T | F | ?) to an identifier!");
 				}
-				// peek = (char) System.in.read();
 				break;
 			default:
 				System.out.println("Unknown: " + peek);
 				token = new Token(TokenType.NULL_TOKEN);
-				peek = (char) System.in.read();
+//				don't wanna read in anymore after getting a null token
+//				peek = (char) System.in.read();
 				break;
 			}
 		}
-		// Now determine what type of token we have...
+
 		return token;
-		// If we have gotten to here, we have not matched any token so print an error
-		// message and return a NULL_TOKEN
 	}
 
 	public Hashtable<String, IdentToken> getIdentifiers() {
